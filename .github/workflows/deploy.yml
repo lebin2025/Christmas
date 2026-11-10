@@ -40,8 +40,14 @@ jobs:
       - name: Build
         run: npm run build
 
+      # enablement: true makes the action turn on GitHub Pages for this repo
+      # on first run (it is OFF by default, which is what caused the
+      # "Get Pages site failed / Not Found" error). The top-level
+      # `pages: write` permission above is what allows this.
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
