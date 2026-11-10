@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted } from 'vue'
 import { ACT_COUNT, AUDIO } from './assets/assets.js'
 import { useExperience } from './composables/useExperience.js'
+import { dbReady } from './composables/useDatabase.js'
 import { useFilmControls } from './composables/useFilmControls.js'
 import { useAudio } from './composables/useAudio.js'
 
@@ -45,7 +46,7 @@ function markLoaded(src) { if (!loaded.includes(src)) loaded.push(src) }
 onMounted(() => {
   load()
   // Exposed for the visual acceptance script (harmless in production).
-  window.__christmas = { state, loaded, audio, musicSrc: AUDIO.music, goToAct, nextAct, prevAct, setAutoPlay, almostSay, whisper, unspokenCount, ACT_COUNT }
+  window.__christmas = { state, loaded, audio, musicSrc: AUDIO.music, goToAct, nextAct, prevAct, setAutoPlay, almostSay, whisper, unspokenCount, dbReady, ACT_COUNT }
   // Browsers only allow audio after a real gesture; preload on the first one.
   audio.armAutoplay()
 })

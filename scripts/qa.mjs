@@ -172,7 +172,16 @@ await page.locator('.letter__paper textarea').fill('愿今年的雪，落在该�
 await page.getByRole('button', { name: /SEAL THE WISH/ }).click()
 await page.waitForTimeout(300)
 report.interactions.savedWishes = await page.evaluate(() => window.__christmas.state.wishes.length)
-report.interactions.localStorage = await page.evaluate(() => (localStorage.getItem('magic-of-christmas.wishes') || '').slice(0, 80))
+report.interactions.sqliteBlobBytes = await page.evaluate(() => new Promise((res) => {
+  const r = indexedDB.open('magic-of-christmas', 1)
+  r.onsuccess = () => {
+    const tx = r.result.transaction('sqlite', 'readonly')
+    const q = tx.objectStore('sqlite').get('db')
+    q.onsuccess = () => res(q.result ? q.result.byteLength : 0)
+    q.onerror = () => res(-1)
+  }
+  r.onerror = () => res(-1)
+}))
 
 // the sealed line stays on the paper, in handwriting tilted with the sheet
 await page.waitForTimeout(1200)
@@ -461,7 +470,26 @@ await page.locator('.finale__selected').click()
 await page.waitForTimeout(700)
 report.interactions.takeBackWhisper = await page.locator('.music__whisper').innerText()
 report.interactions.takeBackCleared = await page.locator('.finale__selected').count()
-report.interactions.unspokenPersisted = await page.evaluate(() => Number(localStorage.getItem('magic-of-christmas.unspoken')))
+report.interactions.unspokenPersisted = await page.evaluate(() => window.__christmas.unspokenCount.value)
+
+// ---- persistence across a reload: the SQLite file in IndexedDB survives.
+// This runs on the SAME desktop page/context (its IndexedDB still holds the
+// database the interactions just wrote) — a fresh context would be isolated.
+const beforeWishes = report.interactions.savedWishes
+const beforeUnspoken = Number((report.interactions.unspokenCount || '0').match(/\d+/)?.[0] || 0)
+await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 })
+await page.waitForFunction(
+  () => Boolean(window.__christmas && window.__christmas.dbReady && window.__christmas.dbReady().value),
+  null,
+  { timeout: 20000 },
+)
+await page.waitForTimeout(400)
+report.persistence = await page.evaluate(() => ({
+  wishes: window.__christmas.state.wishes.length,
+  unspoken: window.__christmas.unspokenCount.value,
+}))
+report.persistence.wishesKept = report.persistence.wishes >= beforeWishes
+report.persistence.unspokenKept = report.persistence.unspoken >= beforeUnspoken
 
 await ctx.close()
 
