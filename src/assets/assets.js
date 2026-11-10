@@ -3,7 +3,11 @@
  * Content-based, NOT filename-based: several originals are misnamed.
  * See ASSET_INVENTORY.md for the full inspection notes.
  */
-const BASE = '/assets/christmas/derived'
+// Every URL is built from the Vite base so the site works both at a domain
+// root and under a GitHub Pages project path (/Christmas/). import.meta.env
+// .BASE_URL already carries the trailing slash.
+const ROOT = import.meta.env.BASE_URL + 'assets/christmas'
+const BASE = ROOT + '/derived'
 
 export const SCENES = {
   arrival: `${BASE}/scenes/final.webp`,       // aurora valley — widest establishing shot
@@ -64,19 +68,19 @@ export const FLAKES = [
  * See ASSET_INVENTORY.md for the original filenames and inspection notes.
  */
 export const MUSIC_BOX = {
-  closed: '/assets/christmas/musicbox/closed.webp',
-  open: '/assets/christmas/musicbox/open.webp',
-  lid: '/assets/christmas/musicbox/lid.webp',
+  closed: ROOT + '/musicbox/closed.webp',
+  open: ROOT + '/musicbox/open.webp',
+  lid: ROOT + '/musicbox/lid.webp',
 }
 
 export const AUDIO = {
   // Visitor-supplied track, 3:20, M4A/AAC audio (no video stream).
   // Kept under its original filename on purpose — see ASSET_INVENTORY.md.
-  music: '/assets/christmas/audio/A Letter I Never Sent.mp4',
-  ambience: '/assets/christmas/audio/cold-wind-breeze-ambience-8e383c41.mp3',
+  music: ROOT + '/audio/A Letter I Never Sent.mp4',
+  ambience: ROOT + '/audio/cold-wind-breeze-ambience-8e383c41.mp3',
   // The ACT III music box has its own independent record. This is the single
   // place to change when replacing the melody: 3:04, M4A/AAC, no video.
-  musicBox: '/assets/christmas/audio/Snowflakes & Unspoken Love.mp4',
+  musicBox: ROOT + '/audio/Snowflakes & Unspoken Love.mp4',
 }
 
 export const ACTS = [
