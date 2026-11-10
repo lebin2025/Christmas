@@ -17,15 +17,16 @@ from statistics import median
 
 from PIL import Image, ImageChops, ImageFilter
 
-ROOT = Path(__file__).resolve().parent.parent / 'public' / 'assets' / 'christmas'
-OUT = ROOT / 'derived'
+REPO = Path(__file__).resolve().parent.parent
+SRC = REPO / 'sources' / 'christmas'            # raw artwork — kept out of the deploy bundle
+OUT = REPO / 'public' / 'assets' / 'christmas' / 'derived'  # browser-ready derivatives
 for sub in ('scenes', 'cutouts', 'plates', 'overlays', 'particles'):
     (OUT / sub).mkdir(parents=True, exist_ok=True)
 
 
 def save_webp(im, path, quality=82):
     im.save(path, 'WEBP', quality=quality, method=5)
-    print(f'  {path.relative_to(ROOT)}  {im.size[0]}x{im.size[1]}  {path.stat().st_size//1024} KB')
+    print(f'  {path.relative_to(REPO)}  {im.size[0]}x{im.size[1]}  {path.stat().st_size//1024} KB')
 
 
 def fit(im, width, height=None):
@@ -203,7 +204,7 @@ def snow_sprite(src, size=256, spread=12):
 
 
 print('\n[1/5] scene plates  (2848x1600 -> 2400px WebP)')
-for p in sorted((ROOT / 'scenes').glob('*.webp')):
+for p in sorted((SRC / 'scenes').glob('*.webp')):
     save_webp(fit(Image.open(p).convert('RGB'), 2400), OUT / 'scenes' / f'{p.stem}.webp', 84)
 
 print('\n[2/5] alpha cut-outs (white-key)')
@@ -216,8 +217,8 @@ WHITE_KEY = {
     'interactive/golden-star.png': ('golden-star', 30),
 }
 for rel, (name, spread) in WHITE_KEY.items():
-    save_webp(white_key(ROOT / rel, spread=spread), OUT / 'cutouts' / f'{name}.webp', 88)
-save_webp(black_key(ROOT / 'decorations' / 'star.png'), OUT / 'cutouts' / 'star.webp', 88)
+    save_webp(white_key(SRC / rel, spread=spread), OUT / 'cutouts' / f'{name}.webp', 88)
+save_webp(black_key(SRC / 'decorations' / 'star.png'), OUT / 'cutouts' / 'star.webp', 88)
 
 print('\n[3/5] photographic plates (feathered alpha edges)')
 # (source, output name, shape) — 'ellipse' for light-ground originals
@@ -236,15 +237,15 @@ PLATES = [
     ('interactive/golden-star.png', 'golden-star-plate', 'ellipse'),
 ]
 for rel, name, shape in PLATES:
-    save_webp(feather_plate(ROOT / rel, shape=shape), OUT / 'plates' / f'{name}.webp', 86)
+    save_webp(feather_plate(SRC / rel, shape=shape), OUT / 'plates' / f'{name}.webp', 86)
 
 print('\n[4/5] atmosphere layers')
-for p in sorted((ROOT / 'overlays').glob('*.png')):
+for p in sorted((SRC / 'overlays').glob('*.png')):
     save_webp(Image.open(p).convert('RGB').resize((1600, 900), Image.LANCZOS),
               OUT / 'overlays' / f'{p.stem}.webp', 78)
 
 print('\n[5/5] snowflake sprites')
-for p in sorted((ROOT / 'particles').glob('*.png')):
+for p in sorted((SRC / 'particles').glob('*.png')):
     save_webp(snow_sprite(p), OUT / 'particles' / f'{p.stem}.webp', 88)
 
 print('\nDerived assets ready.')

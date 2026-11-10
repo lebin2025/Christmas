@@ -70,7 +70,8 @@ Christmas/
 │  └─ styles/                 # 全局 / 场景 / 变量 / 动画
 ├─ public/
 │  ├─ favicon.svg
-│  └─ assets/christmas/       # 派生素材（webp）+ 音频 + 八音盒照片
+│  └─ assets/christmas/       # 部署用：derived/(webp) + audio/(mp3/mp4) + musicbox/(webp)
+├─ sources/christmas/         # 转码源素材（原始 PNG/webp），不进部署包，供 scripts/ 重跑
 ├─ scripts/                   # alpha 推导、无头 QA、dist 清理
 ├─ ASSET_INVENTORY.md         # 素材来源与转码说明（详见）
 └─ LICENSE

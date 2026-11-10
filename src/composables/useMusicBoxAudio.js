@@ -28,7 +28,7 @@ function ensure() {
   track = new Howl({
     src: [AUDIO.musicBox],
     html5: true,          // M4A/AAC: the browser media stack decodes it reliably
-    preload: true,
+    preload: false, // stream on play — never preload the 3-minute record
     loop: false,
     volume: 0,
     onload: () => {

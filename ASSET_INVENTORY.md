@@ -10,10 +10,10 @@
 | 项目 | 实际情况 |
 | --- | --- |
 | 技术栈 | **无**。检查时项目为空白工程，只有 `public/assets/`，无 `package.json`、无源码、无构建配置 |
-| 目录结构 | `public/assets/christmas/{scenes, decorations, interactive, particles, overlays}/` |
+| 目录结构 | 源素材已移至 `sources/christmas/{scenes, decorations, interactive, particles, overlays}/`（不进部署包）；浏览器资源在 `public/assets/christmas/{derived, audio, musicbox}/`，由 `scripts/` 从源转码生成 |
 | 已有页面 / 组件 | 无 |
 | 已安装依赖 | 无（`node_modules` 不存在）。环境：Node v22.22.2 / npm 10.9.7 / Python 3.13 + Pillow 13 |
-| 素材总量 | 30 张，约 **150 MB**；5 张 WebP 场景 + 25 张 2048² PNG |
+| 素材总量 | 30 张，约 **150 MB**（仓库内，原始素材在 `sources/`）；`public/` 部署包仅约 21 MB（derived + audio + musicbox 的 webp/mp3/mp4） |
 | 音频 | **原始素材中没有音频文件**；现有音频见文末「补充生成」，主曲已由用户提供的《A Letter I Never Sent》替换 |
 
 ### ⚠️ 三个必须知道的真相

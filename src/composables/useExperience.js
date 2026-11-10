@@ -126,13 +126,20 @@ function toggleAutoPlay() { state.autoPlay = !state.autoPlay }
 async function load() {
   state.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   state.progress = 1 / ACT_COUNT
-  try {
-    const [wishes, unspoken] = await Promise.all([dbGetWishes(), dbGetUnspoken()])
-    state.wishes = wishes
-    unspokenCount.value = unspoken
-  } catch (err) {
-    console.warn('[experience] hydration from SQLite failed:', err)
+  // Defer SQLite hydration: the database's 685 KB wasm must not block first
+  // paint. Defaults above hold until the browser goes idle, then we fill in
+  // wishes and the unspoken count. Nothing else depends on this being sync.
+  const hydrate = async () => {
+    try {
+      const [wishes, unspoken] = await Promise.all([dbGetWishes(), dbGetUnspoken()])
+      state.wishes = wishes
+      unspokenCount.value = unspoken
+    } catch (err) {
+      console.warn('[experience] hydration from SQLite failed:', err)
+    }
   }
+  if ('requestIdleCallback' in window) requestIdleCallback(() => { hydrate() })
+  else setTimeout(hydrate, 400)
 }
 
 export function useExperience() {

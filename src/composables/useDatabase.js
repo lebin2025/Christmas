@@ -1,5 +1,4 @@
 import { ref } from 'vue'
-import initSqlJs from 'sql.js'
 // Vite resolves this to a hashed, base-aware asset URL at build time, so the
 // wasm loads correctly in both `vite dev` and a GitHub Pages deployment.
 import wasmUrl from 'sql.js/dist/sql-wasm.wasm?url'
@@ -77,7 +76,13 @@ async function ensure() {
   if (db) return db
   if (failed) return null
   try {
-    if (!SQL) SQL = await initSqlJs({ locateFile: () => wasmUrl })
+    if (!SQL) {
+      // sql.js is dynamically imported so its ~280 KB never sits in the
+      // first-paint bundle; the 685 KB wasm it then fetches is itself deferred
+      // until the first real DB use (the idle hydration in useExperience).
+      const sqlJs = await import('sql.js')
+      SQL = await sqlJs.default({ locateFile: () => wasmUrl })
+    }
     const bytes = await idbGet()
     if (bytes) {
       db = new SQL.Database(new Uint8Array(bytes))

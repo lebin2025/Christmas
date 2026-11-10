@@ -25,7 +25,8 @@ function ensure() {
     html5: true,
     loop: true,
     volume: 0.6,
-    preload: true,
+    // Do NOT preload: the track is ~4.6 MB and should only download on play.
+    preload: false,
     onload: () => { isReady.value = true },
     onloaderror: (_id, err) => console.warn('[audio] music failed to load:', err),
     onplayerror: (_id, err) => console.warn('[audio] music failed to play:', err),
@@ -34,7 +35,8 @@ function ensure() {
     src: [AUDIO.ambience],
     loop: true,
     volume: 0.22,
-    preload: true,
+    // Ambience stays off by default; never preload a 3.8 MB file nobody asked for.
+    preload: false,
     onloaderror: (_id, err) => console.warn('[audio] ambience failed to load:', err),
   })
 }

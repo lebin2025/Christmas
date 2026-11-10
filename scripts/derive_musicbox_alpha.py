@@ -25,7 +25,7 @@ from pathlib import Path
 from PIL import Image, ImageChops
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "public/assets/christmas/musicbox/source"
+SRC = ROOT / "sources/christmas/musicbox-source"
 OUT = ROOT / "public/assets/christmas/musicbox"
 
 # Both surviving plates are dark walnut/gold on a pale tabletop, so an
