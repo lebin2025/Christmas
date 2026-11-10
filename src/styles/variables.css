@@ -1,0 +1,46 @@
+:root {
+  /* --- night palette --- */
+  --night-900: #05070d;
+  --night-800: #080d18;
+  --night-700: #0d1526;
+  --night-600: #142038;
+  --ink: #e9e2d2;
+  --ink-soft: rgba(233, 226, 210, 0.68);
+  --ink-faint: rgba(233, 226, 210, 0.38);
+
+  /* --- candlelight & gold --- */
+  --gold-100: #f7e9c6;
+  --gold-300: #e8c88a;
+  --gold-500: #cfa059;
+  --gold-700: #8d6a34;
+  --amber: #ffbf6b;
+  --ember: #ff9b45;
+
+  /* --- winter & velvet --- */
+  --ice: #b9d4ec;
+  --ice-deep: #3a5f8a;
+  --crimson: #8d2532;
+  --crimson-deep: #4a1018;
+
+  /* --- type --- */
+  --font-display: 'Cinzel', 'Noto Serif SC', Georgia, serif;
+  --font-elegant: 'Cormorant Garamond', 'Noto Serif SC', Georgia, serif;
+  --font-cn: 'Noto Serif SC', 'Songti SC', serif;
+  /* handwriting on the letter: a kai/brush face, italicised and rotated to
+     follow the photographed paper's own tilt */
+  --font-hand: 'Kaiti SC', 'STKaiti', 'KaiTi', '楷体', 'Noto Serif SC', 'Songti SC', serif;
+
+  /* --- film language --- */
+  --letterbox: 3.2vh;
+  --ease-film: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --grade-warm: rgba(255, 178, 92, 0.07);
+  --grade-cool: rgba(18, 34, 68, 0.30);
+  --hairline: rgba(232, 200, 138, 0.28);
+
+  --z-scene: 1;
+  --z-snow: 20;
+  --z-overlay: 30;
+  --z-ui: 50;
+  --z-veil: 70;
+}

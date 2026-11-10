@@ -1,0 +1,304 @@
+/* ============================================================
+   Shared camera / scene grammar
+   Six acts stacked in a fixed .camera; one is projected at a time.
+   Page turns dissolve through a black splice. Depth is built from
+   CSS-variable pointer parallax + a slow keyframed camera breath,
+   never from a scrubbed scroll timeline.
+   ============================================================ */
+
+.camera {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-scene);
+  overflow: clip;
+  background: #04060b;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  overflow: clip;
+  pointer-events: none;
+  isolation: isolate;
+  contain: layout paint;
+}
+.scene.is-active { pointer-events: auto; }
+
+/* --- layer 0: the photographic plate ---------------------- */
+.scene__background {
+  position: absolute;
+  inset: -4%;
+  z-index: 0;
+  /* Explicit initial value: GSAP must never start a --push tween from 0. */
+  --push: 1;
+  /* Pointer parallax — a pure CSS transform driven by two smoothed vars. */
+  transform: translate3d(
+    calc(var(--par-x, 0) * -13px),
+    calc(var(--par-y, 0) * -9px),
+    0
+  ) scale(var(--push, 1));
+  /* ACT III's music box tweens --push for its subtle dolly-in; the pointer
+     parallax above keeps working because only the custom property changes. */
+  will-change: transform;
+}
+/* The plate breathes (18s) while the act is projected; CSS pauses it for
+   every hidden act, so only one composited layer is ever animating. */
+.scene__plate {
+  position: absolute;
+  inset: 0;
+  animation: camera-breath 18s ease-in-out infinite alternate;
+  animation-play-state: paused;
+  will-change: transform;
+}
+.scene.is-active .scene__plate { animation-play-state: running; }
+.scene__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  will-change: transform;
+  filter: saturate(0.88) contrast(1.06) brightness(0.82);
+}
+
+/* a single colour grade applied to every act = one cinematographer */
+.scene__grade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 76% 66% at 50% 42%, transparent 30%, rgba(3, 6, 14, 0.42) 100%),
+    linear-gradient(180deg, rgba(6, 12, 26, 0.52) 0%, transparent 30%, transparent 62%, rgba(4, 7, 14, 0.78) 100%),
+    linear-gradient(105deg, rgba(18, 34, 68, 0.30), transparent 55%, rgba(255, 168, 78, 0.09));
+  mix-blend-mode: normal;
+}
+
+.scene__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  background: radial-gradient(ellipse 68% 72% at 50% 48%, transparent 42%, rgba(2, 4, 9, 0.72) 100%);
+}
+
+/* --- layer 1: atmosphere ----------------------------------- */
+.scene__atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+.atmo {
+  position: absolute;
+  inset: -12%;
+  width: 124%;
+  height: 124%;
+  object-fit: cover;
+  opacity: 0.13;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+.atmo--fog {
+  inset: auto -10% -12% -10%;
+  width: 120%;
+  height: 62%;
+  object-fit: cover;
+  mix-blend-mode: screen;
+  opacity: 0.085;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 72%);
+  mask-image: linear-gradient(180deg, transparent, #000 72%);
+}
+.atmo--beam {
+  mix-blend-mode: screen;
+  opacity: 0.09;
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 85%);
+  mask-image: linear-gradient(180deg, #000, transparent 85%);
+}
+
+.scene__light {
+  position: absolute;
+  z-index: 3;
+  width: 60vw;
+  height: 60vw;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 186, 96, 0.16) 0%, rgba(255, 170, 80, 0.05) 35%, transparent 70%);
+  filter: blur(12px);
+  animation: breath 9s var(--ease-soft) infinite;
+}
+
+/* --- layer 2: mid-ground ----------------------------------- */
+.scene__mid,
+.scene__foreground {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+.scene__mid {
+  z-index: 4;
+  transform: translate3d(calc(var(--par-x, 0) * 9px), calc(var(--par-y, 0) * 6px), 0);
+}
+.scene__foreground {
+  z-index: 7;
+  transform: translate3d(calc(var(--par-x, 0) * 21px), calc(var(--par-y, 0) * 13px), 0);
+}
+
+.depth-object { position: absolute; user-select: none; }
+/* Static near-focus falloff on small cutouts only — no full-screen filter,
+   so pointer parallax stays a cheap GPU transform. */
+.scene__foreground .depth-object { filter: blur(1.15px); }
+.depth-object img { width: 100%; height: auto; }
+
+/* --- layer 3: typography & interaction --------------------- */
+.scene__stage {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  padding: calc(var(--letterbox) + 4vh) clamp(1.5rem, 7vw, 9rem) calc(var(--letterbox) + 4vh);
+  display: grid;
+  align-items: center;
+  grid-template-columns: 1fr 1fr;
+  gap: 4vw;
+  pointer-events: none;
+  isolation: isolate;
+}
+.scene.is-active .scene__stage { pointer-events: auto; }
+
+/* A directional scrim: chiaroscuro, not a flat dark card. It lets the
+   typography stay legible without dimming the whole photograph. */
+.scene__stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(3, 6, 13, 0.72) 0%, rgba(3, 6, 13, 0.46) 26%, rgba(3, 6, 13, 0.08) 54%, transparent 72%);
+}
+.scene__stage--full::before,
+.scene--centered .scene__stage::before {
+  background:
+    radial-gradient(ellipse 62% 62% at 50% 40%, rgba(3, 6, 13, 0.52), transparent 82%),
+    linear-gradient(180deg, rgba(3, 6, 13, 0.52), transparent 34%, transparent 68%, rgba(3, 6, 13, 0.55));
+}
+/* ACT III keeps the tree clear; type lives in the shaded left wing. */
+.scene__stage.tree-layout::before {
+  background: linear-gradient(90deg, rgba(3, 6, 13, 0.84) 0%, rgba(3, 6, 13, 0.64) 22%, rgba(3, 6, 13, 0.2) 46%, transparent 66%);
+}
+
+.scene__chapter { align-self: center; justify-self: start; max-width: 46rem; }
+.scene__interaction {
+  align-self: center;
+  justify-self: end;
+  width: min(34vw, 520px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  position: relative;
+  isolation: isolate;
+}
+/* soft elliptical shadow behind the controls — no visible card edge */
+.scene__interaction::before {
+  content: '';
+  position: absolute;
+  inset: -16%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse 58% 58% at 50% 50%, rgba(3, 6, 13, 0.62), transparent 78%);
+}
+
+.scene__stage--full {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+.scene__stage--full > * { grid-column: 1 / -1; }
+
+.scene--centered .scene__stage {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+.scene--centered .scene__chapter { justify-self: center; }
+.scene--centered .scene__lede { margin-left: auto; margin-right: auto; }
+.scene--centered .gold-rule { margin-left: auto; margin-right: auto; }
+
+.scene__chapter .act-numeral { display: block; margin-bottom: 1.2rem; }
+.scene__chapter .gold-rule { margin: 2.1rem 0 0; }
+
+.scene__hint {
+  margin-top: 2.4rem;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.scene__hint::before {
+  content: '';
+  width: 18px; height: 1px;
+  background: var(--gold-500);
+  opacity: 0.8;
+}
+
+/* --- bottom fade into black -------------------------------- */
+.scene__fade {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0;
+  background: #04060b;
+}
+
+/* ============================================================
+   Responsive: a different shot composition for phones,
+   not a shrunken desktop layout.
+   ============================================================ */
+@media (max-width: 900px) {
+  .scene__stage,
+  .scene__stage--full,
+  .scene--centered .scene__stage {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    align-content: center;
+    justify-items: center;
+    text-align: center;
+    gap: 2.2rem;
+    padding: calc(var(--letterbox) + 6vh) 1.5rem calc(var(--letterbox) + 5vh);
+  }
+  .scene__stage::before,
+  .scene__stage--full::before,
+  .scene__stage.tree-layout::before,
+  .scene--centered .scene__stage::before {
+    background: linear-gradient(180deg, rgba(3, 6, 13, 0.62), rgba(3, 6, 13, 0.3) 42%, rgba(3, 6, 13, 0.66));
+  }
+  .scene-title em { white-space: normal; }
+  .scene__stage--full > * { grid-row: auto; }
+  .scene__chapter { justify-self: center; max-width: 100%; }
+  .scene__interaction { justify-self: center; width: min(78vw, 420px); }
+  .scene__chapter .gold-rule,
+  .scene--centered .gold-rule { margin-left: auto; margin-right: auto; }
+  /* A little wider on phones: the quiet, short sentences should break into
+     two even lines instead of leaving one orphan character at the end. */
+  .scene__lede { margin-left: auto; margin-right: auto; max-width: 34ch; }
+  .scene__hint { justify-content: center; margin-top: 1.6rem; }
+  .scene__image { object-position: 50% 45%; }
+  .scene__light { width: 100vw; height: 100vw; }
+}
+
+@media (max-width: 480px) {
+  .scene-title { font-size: clamp(2rem, 10.5vw, 3rem); letter-spacing: 0.03em; }
+  .scene-title em { font-size: 0.44em; margin-top: 0.7rem; }
+  .scene-lede { font-size: 1rem; line-height: 1.7; margin-top: 1.1rem; }
+  .eyebrow { letter-spacing: 0.34em; margin-bottom: 0.9rem; }
+  .film-btn { padding: 0.7rem 1.2rem; font-size: 0.6rem; letter-spacing: 0.2em; }
+}
