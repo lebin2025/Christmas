@@ -20,6 +20,14 @@ import CabinScene from './scenes/CabinScene.vue'
 import WishesScene from './scenes/WishesScene.vue'
 import FinaleScene from './scenes/FinaleScene.vue'
 
+// One act is mounted at a time. The six photographic plates are projected
+// sequentially instead of all living in the DOM, so the browser only fetches
+// the current act's images on first paint — not every act's at once. The
+// black-splice veil (SceneTransition.vue) covers each swap, so the cross-cut
+// reads exactly as before. (Named ACT_COMPONENTS to avoid clashing with the
+// content-based SCENES image map in assets.js.)
+const ACT_COMPONENTS = [OpeningScene, TownScene, TreeScene, CabinScene, WishesScene, FinaleScene]
+
 const { state, load, goToAct, nextAct, prevAct, setAutoPlay, almostSay, whisper, unspokenCount } = useExperience()
 const audio = useAudio()
 const controls = useFilmControls()
@@ -60,12 +68,11 @@ onUnmounted(() => {
 <template>
   <!-- The fixed camera: six real photographic plates, one projected at a time. -->
   <div class="camera" @dblclick="onDoubleClick">
-    <OpeningScene @loaded="markLoaded" />
-    <TownScene @loaded="markLoaded" />
-    <TreeScene @loaded="markLoaded" />
-    <CabinScene @loaded="markLoaded" />
-    <WishesScene @loaded="markLoaded" />
-    <FinaleScene @loaded="markLoaded" />
+    <component
+      :is="ACT_COMPONENTS[state.activeAct]"
+      :key="state.activeAct"
+      @loaded="markLoaded"
+    />
   </div>
 
   <SnowParticles />

@@ -439,9 +439,13 @@ await page.screenshot({ path: path.join(OUT, 'interaction-music-box-closed-again
 
 // ACT IV — the line inside the gift travels into the letter
 await turnTo(page, 3)
-// Leaving ACT III must not leave a record playing, a tween running or a
-// camera that stayed pushed in.
+// One act is mounted at a time now, so leaving ACT III unmounts the music box
+// — its record, tweens and camera push are torn down with it. Re-enter to
+// prove the remount is a clean, closed box (no leftover playback/dolly-in).
+await turnTo(page, 2)
 report.musicBox.afterLeavingAct = await MB()
+report.musicBox.remountClean = report.musicBox.afterLeavingAct.phase === 'closed' && !report.musicBox.afterLeavingAct.playing
+await turnTo(page, 3)
 if (!(await page.locator('.cabin__send').count())) {
   await page.locator('.cabin__gift-stage').click({ force: true })
   await page.waitForTimeout(300)
@@ -555,8 +559,11 @@ await rm.route('https://fonts.googleapis.com/**', (r) =>
 const rp = await rm.newPage()
 rp.on('pageerror', (e) => errors.push(`reduced-motion pageerror: ${e.message}`))
 await rp.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 })
-await rp.waitForFunction(() => Boolean(window.__christmas && window.__musicBox), null, { timeout: 20000 })
+await rp.waitForFunction(() => Boolean(window.__christmas), null, { timeout: 20000 })
+// The box only exists once ACT III is mounted (one act at a time), so enter
+// first, then wait for the component to expose itself.
 await rp.evaluate(() => window.__christmas.goToAct(2, true))
+await rp.waitForFunction(() => Boolean(window.__musicBox), null, { timeout: 20000 })
 await rp.waitForTimeout(900)
 await rp.locator('.mb__touch').click()
 await rp.waitForTimeout(320)
